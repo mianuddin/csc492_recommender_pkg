@@ -6,4 +6,5 @@ if __name__ == "__main__":
                      author="Mian Uddin",
                      description="A small recommender package",
                      packages=["recommender_pkg"],
-                     install_requires = ["numpy"])
+                     install_requires = ["numpy",
+                                         "pandas"])

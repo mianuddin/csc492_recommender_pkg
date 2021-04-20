@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def dcg_score(l):
     """TODO: write docstring"""
     return sum([s/np.log2(i+2) for i, s in enumerate(l)])

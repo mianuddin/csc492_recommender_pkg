@@ -33,7 +33,7 @@ def LeaveMembersOut(*lists, groups=None, n_val=1, n_test=1, seed=None):
         idx_train.extend(shuffled.iloc[(n_val+n_test):].index.to_list())
         idx_val.extend(shuffled.iloc[:n_val].index.to_list())
         idx_test.extend(shuffled.iloc[n_val:(n_val+n_test)].index.to_list())
-    
+
     idx_train = random.sample(idx_train, len(idx_train))
     idx_val = random.sample(idx_val, len(idx_val))
     idx_test = random.sample(idx_test, len(idx_test))

@@ -1,15 +1,15 @@
 import numpy as np
 
 
-def dcg_score(l):
+def dcg_score(items):
     """TODO: write docstring"""
-    return sum([s/np.log2(i+2) for i, s in enumerate(l)])
+    return sum([s/np.log2(i+2)for i, s in enumerate(items)])
 
 
-def ndcg_score(l):
+def ndcg_score(items):
     """TODO: write docstring"""
-    idcg = dcg_score(sorted(l, reverse = True))
-    return idcg if idcg == 0 else dcg_score(l) / idcg
+    idcg = dcg_score(sorted(l, reverse=True))
+    return idcg if idcg == 0 else dcg_score(items) / idcg
 
 
 def perform_groupwise_evaluation(X_test, y_test, y_pred):
@@ -23,7 +23,6 @@ def perform_groupwise_evaluation(X_test, y_test, y_pred):
 
     for user in np.unique(X_test[:, 0]):
         user_idx = X_test[:, 0] == user
-        X_test_temp = X_test[user_idx]
         y_test_temp = y_test[user_idx]
         y_pred_temp = y_pred[user_idx]
         idx_top = np.argsort(y_pred_temp)[:-11:-1]

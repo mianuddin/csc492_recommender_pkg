@@ -3,12 +3,12 @@ import numpy as np
 
 def dcg_score(items):
     """TODO: write docstring"""
-    return sum([s/np.log2(i+2)for i, s in enumerate(items)])
+    return sum([s/np.log2(i+2) for i, s in enumerate(items)])
 
 
 def ndcg_score(items):
     """TODO: write docstring"""
-    idcg = dcg_score(sorted(l, reverse=True))
+    idcg = dcg_score(sorted(items, reverse=True))
     return idcg if idcg == 0 else dcg_score(items) / idcg
 
 

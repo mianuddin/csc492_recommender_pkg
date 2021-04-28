@@ -16,3 +16,9 @@ Use the following command to run unit tests.
 ```python
 python3 -m unittest tests
 ```
+
+## Document
+Use the following command to build the documentation.
+```sh
+(cd docs/ && make html)
+```

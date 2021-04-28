@@ -4,8 +4,24 @@ import random
 
 
 def LeaveMembersOut(*lists, groups=None, n_val=1, n_test=1, seed=None):
-    """Generates indices to split data into a training and test set.
-    TODO: finish docstring
+    """Returns indices to split data into train, val, and test sets.
+
+    Returns indices of train, test, and validation sets based on the given
+    number of validation and test items per group. The function accepts a
+    variable number of lists, which is included for consistency with similar
+    `scikit-learn` functions. The length of the lists is used to determine the
+    number of indices. If a list of groups is specified, the specified number
+    of members of each group will be placed in the validation and test sets.
+
+    Args:
+        *lists: One or more lists from which to leave members out
+        groups: A list by which the indices may be grouped (e.g. user ids)
+        n_val: The number of members to be left out for the val set
+        n_test: The number of members to be left out for the test set
+        seed: A random seed
+
+    Returns:
+        A tuple containing lists of indices in the order train, val, test
     """
     if seed is not None:
         random.seed(seed)
@@ -42,9 +58,21 @@ def LeaveMembersOut(*lists, groups=None, n_val=1, n_test=1, seed=None):
 
 
 def sample_n_non_interactions(X, y, user_id, n=100, seed=None):
-    """TODO: update docstring
+    """Samples non-interactions for a given user.
+
     Returns X (user, item) and y (zeros) np arrays of N (100 by default) items
     which the user has not interacted with.
+
+    Args:
+        X: An array of (user, item)
+        y: An array denoting interactions
+        user_id: The unique identifier of a user
+        n: The number of non-interactions to sample
+        seed: A random seed
+
+    Returns:
+        A tuple consisting of an array of (user, item) and an array of zeros
+
     """
     if seed is not None:
         np.random.seed(seed)

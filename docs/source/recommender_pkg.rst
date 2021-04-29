@@ -4,6 +4,14 @@ recommender\_pkg package
 Submodules
 ----------
 
+recommender\_pkg.evaluation module
+----------------------------------
+
+.. automodule:: recommender_pkg.evaluation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 recommender\_pkg.implicit module
 --------------------------------
 

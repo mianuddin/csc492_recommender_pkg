@@ -8,5 +8,7 @@ if __name__ == "__main__":
                      packages=["recommender_pkg"],
                      install_requires=["numpy",
                                        "pandas",
+                                       "seaborn",
                                        "sklearn",
-                                       "tensorflow"])
+                                       "tensorflow",
+                                       "tqdm"])

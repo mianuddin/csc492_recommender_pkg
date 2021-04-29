@@ -5,6 +5,32 @@ from sklearn.base import ClassifierMixin
 from tensorflow import keras
 
 
+class ItemPopularity(ClassifierMixin):
+    """Recommender based solely on interactions per item."""
+
+    def fit(self, X=None, y=None):
+        """Fit the classifier from the training dataset.
+
+        Args:
+            X: ndarray of shape (n_samples, 2)
+            y: ndarray of shape (n_samples,)
+        """
+        unique, counts = np.unique(X[y == 1, 1], return_counts=True)
+        self.interactions_by_item = dict(zip(unique, counts))
+
+    def predict(self, X=None):
+        """Predict the class labels for the provided data.
+
+        Args:
+            X: ndarray of shape (n_samples, 2)
+
+        Returns:
+            y: Class labels for each data sample.
+        """
+        y_pred = np.array([self.interactions_by_item[i] for i in X[:, 1]])
+        return y_pred / max(y_pred)
+
+
 class GeneralizedMatrixFactorization(ClassifierMixin):
     """Recommender implementing the GMF architecture.
 

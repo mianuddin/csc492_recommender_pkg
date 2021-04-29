@@ -59,6 +59,32 @@ class GeneralizedMatrixFactorization(ClassifierMixin):
         self.user_preprocessing_layers = user_preprocessing_layers
         self.item_preprocessing_layers = item_preprocessing_layers
 
+    @staticmethod
+    def create_core_layers(n_factors, user_layers, item_layers):
+        """Creates the core layers of the GMF model.
+
+        Returns the hidden layers of the model. Specifically, the ones between
+        the inputs and the visible, output layer.
+
+        Args:
+            n_factors (int): The number of latent factors
+            user_layers (Layer): The input or preprocessing layers for the
+                                 users.
+            item_layers (Layer): The input or preprocessing layers for the
+                                 items.
+
+        Returns:
+            Layer: The core layers of the model.
+        """
+
+        gmf_layers = [
+            keras.layers.Dense(n_factors)(user_layers),
+            keras.layers.Dense(n_factors)(item_layers)
+        ]
+        gmf_layers = keras.layers.Multiply()(gmf_layers)
+
+        return gmf_layers
+
     def create_model(self):
         """Creates a new GMF model."""
         user_input = (self.user_input
@@ -79,16 +105,17 @@ class GeneralizedMatrixFactorization(ClassifierMixin):
             else item_input
         )
 
-        gmf_output = [
-            keras.layers.Dense(self.n_factors)(user_preprocessing_layers),
-            keras.layers.Dense(self.n_factors)(item_preprocessing_layers)
-        ]
-        gmf_output = keras.layers.Multiply()(gmf_output)
+        gmf_layers = GeneralizedMatrixFactorization.create_core_layers(
+            self.n_factors,
+            user_preprocessing_layers,
+            item_preprocessing_layers
+        )
+
         gmf_output = keras.layers.Dense(
             1,
             activation="sigmoid",
             kernel_constraint=keras.constraints.unit_norm()
-        )(gmf_output)
+        )(gmf_layers)
 
         return keras.Model(inputs=[user_input, item_input],
                            outputs=[gmf_output],
@@ -159,6 +186,35 @@ class MultiLayerPerceptron(ClassifierMixin):
         self.user_preprocessing_layers = user_preprocessing_layers
         self.item_preprocessing_layers = item_preprocessing_layers
 
+    @staticmethod
+    def create_core_layers(n_factors,
+                           n_hidden_layers,
+                           user_layers,
+                           item_layers):
+        """Creates the core layers of the MLP model.
+
+        Returns the hidden layers of the model. Specifically, the ones between
+        the inputs and the visible, output layer.
+
+        Args:
+            n_factors (int): The number of latent factors
+            user_layers (Layer): The input or preprocessing layers for the
+                                 users.
+            item_layers (Layer): The input or preprocessing layers for the
+                                 items.
+
+        Returns:
+            Layer: The core layers of the model.
+        """
+
+        mlp_layers = keras.layers.Concatenate()([user_layers, item_layers])
+
+        for i in range(n_hidden_layers)[::-1]:
+            mlp_layers = keras.layers.Dense(n_factors * (2 ** i),
+                                            activation="relu")(mlp_layers)
+
+        return mlp_layers
+
     def create_model(self):
         """Creates a new MLP model."""
 
@@ -180,19 +236,19 @@ class MultiLayerPerceptron(ClassifierMixin):
             else item_input
         )
 
-        mlp_layers = keras.layers.Concatenate()([user_preprocessing_layers,
-                                                 item_preprocessing_layers])
+        mlp_layers = MultiLayerPerceptron.create_core_layers(
+            self.n_factors,
+            self.n_hidden_layers,
+            user_preprocessing_layers,
+            item_preprocessing_layers
+        )
 
-        for i in range(self.n_hidden_layers)[::-1]:
-            mlp_layers = keras.layers.Dense(self.n_factors * (2 ** i),
-                                            activation="relu")(mlp_layers)
-
-        mlp_layers = keras.layers.Dense(1,
+        mlp_output = keras.layers.Dense(1,
                                         activation="sigmoid",
                                         use_bias=False)(mlp_layers)
 
         return keras.Model(inputs=[user_input, item_input],
-                           outputs=[mlp_layers],
+                           outputs=[mlp_output],
                            name="multi-layer_perceptron")
 
     def fit(self, X=None, y=None):

@@ -1,37 +1,43 @@
 import numpy as np
 import random
 import tensorflow as tf
-from sklearn.base import ClassifierMixin
+from sklearn.base import BaseEstimator
 from tensorflow import keras
 
 
-class ItemPopularity(ClassifierMixin):
+class ItemPopularity(BaseEstimator):
     """Recommender based solely on interactions per item."""
 
     def fit(self, X=None, y=None):
-        """Fit the classifier from the training dataset.
+        """Fit the recommender from the training dataset.
 
         Args:
-            X: ndarray of shape (n_samples, 2)
-            y: ndarray of shape (n_samples,)
+            X (ndarray of shape (n_samples, 2)): An array where each row
+                                                 consists of a user and an
+                                                 item.
+            y (ndarray of shape (n_samples,)): An array where each entry
+                                               denotes interactions between
+                                               the corresponding user and item.
         """
         unique, counts = np.unique(X[y == 1, 1], return_counts=True)
         self.interactions_by_item = dict(zip(unique, counts))
 
     def predict(self, X=None):
-        """Predict the class labels for the provided data.
+        """Predict the scores for the provided data.
 
         Args:
-            X: ndarray of shape (n_samples, 2)
+            X (ndarray of shape (n_samples, 2)): An array where each row
+                                                 consists of a user and an
+                                                 item.
 
         Returns:
-            y: Class labels for each data sample.
+            ndarray of shape (n_samples,): Class labels for each data sample.
         """
         y_pred = np.array([self.interactions_by_item[i] for i in X[:, 1]])
         return y_pred / max(y_pred)
 
 
-class GeneralizedMatrixFactorization(ClassifierMixin):
+class GeneralizedMatrixFactorization(BaseEstimator):
     """Recommender implementing the GMF architecture.
 
     Args:
@@ -77,6 +83,8 @@ class GeneralizedMatrixFactorization(ClassifierMixin):
             Layer: The core layers of the model.
         """
 
+        # TODO: add pretraining
+
         gmf_layers = [
             keras.layers.Dense(n_factors)(user_layers),
             keras.layers.Dense(n_factors)(item_layers)
@@ -117,23 +125,27 @@ class GeneralizedMatrixFactorization(ClassifierMixin):
             kernel_constraint=keras.constraints.unit_norm()
         )(gmf_layers)
 
-        return keras.Model(inputs=[user_input, item_input],
-                           outputs=[gmf_output],
-                           name="generalized_matrix_factorization")
+        self.model = keras.Model(inputs=[user_input, item_input],
+                                 outputs=[gmf_output],
+                                 name="generalized_matrix_factorization")
 
     def fit(self, X=None, y=None):
-        """Fit the classifier from the training dataset.
+        """Fit the recommender from the training dataset.
 
         Args:
-            X: ndarray of shape (n_samples, 2)
-            y: ndarray of shape (n_samples,)
+            X (ndarray of shape (n_samples, 2)): An array where each row
+                                                 consists of a user and an
+                                                 item.
+            y (ndarray of shape (n_samples,)): An array where each entry
+                                               denotes interactions between
+                                               the corresponding user and item.
         """
         if self.seed:
             random.seed(self.seed)
             np.random.seed(self.seed)
             tf.random.set_seed(self.seed)
 
-        self.model = self.create_model()
+        self.create_model()
         self.model.compile(optimizer=keras.optimizers.Adam(),
                            loss=keras.losses.BinaryCrossentropy(),
                            metrics=[keras.metrics.BinaryAccuracy()])
@@ -143,19 +155,21 @@ class GeneralizedMatrixFactorization(ClassifierMixin):
                                       epochs=self.epochs)
 
     def predict(self, X=None):
-        """Predict the class labels for the provided data.
+        """Predict the scores for the provided data.
 
         Args:
-            X: ndarray of shape (n_samples, 2)
+            X (ndarray of shape (n_samples, 2)): An array where each row
+                                                 consists of a user and an
+                                                 item.
 
         Returns:
-            y: Class labels for each data sample.
+            ndarray of shape (n_samples,): Class labels for each data sample.
         """
         return (self.model.predict([X[:, i] for i in range(X.shape[1])])
                           .reshape(-1))
 
 
-class MultiLayerPerceptron(ClassifierMixin):
+class MultiLayerPerceptron(BaseEstimator):
     """Recommender implementing the MLP architecture.
 
     Args:
@@ -207,6 +221,8 @@ class MultiLayerPerceptron(ClassifierMixin):
             Layer: The core layers of the model.
         """
 
+        # TODO: add pretraining
+
         mlp_layers = keras.layers.Concatenate()([user_layers, item_layers])
 
         for i in range(n_hidden_layers)[::-1]:
@@ -247,23 +263,27 @@ class MultiLayerPerceptron(ClassifierMixin):
                                         activation="sigmoid",
                                         use_bias=False)(mlp_layers)
 
-        return keras.Model(inputs=[user_input, item_input],
-                           outputs=[mlp_output],
-                           name="multi-layer_perceptron")
+        self.model = keras.Model(inputs=[user_input, item_input],
+                                 outputs=[mlp_output],
+                                 name="multi-layer_perceptron")
 
     def fit(self, X=None, y=None):
-        """Fit the classifier from the training dataset.
+        """Fit the recommender from the training dataset.
 
         Args:
-            X: ndarray of shape (n_samples, 2)
-            y: ndarray of shape (n_samples,)
+            X (ndarray of shape (n_samples, 2)): An array where each row
+                                                 consists of a user and an
+                                                 item.
+            y (ndarray of shape (n_samples,)): An array where each entry
+                                               denotes interactions between
+                                               the corresponding user and item.
         """
         if self.seed:
             random.seed(self.seed)
             np.random.seed(self.seed)
             tf.random.set_seed(self.seed)
 
-        self.model = self.create_model()
+        self.create_model()
         self.model.compile(optimizer=keras.optimizers.Adam(),
                            loss=keras.losses.BinaryCrossentropy(),
                            metrics=[keras.metrics.BinaryAccuracy()])
@@ -273,13 +293,136 @@ class MultiLayerPerceptron(ClassifierMixin):
                                       epochs=self.epochs)
 
     def predict(self, X=None):
-        """Predict the class labels for the provided data.
+        """Predict the scores for the provided data.
 
         Args:
-            X: ndarray of shape (n_samples, 2)
+            X (ndarray of shape (n_samples, 2)): An array where each row
+                                                 consists of a user and an
+                                                 item.
 
         Returns:
-            y: Class labels for each data sample.
+            ndarray of shape (n_samples,): Class labels for each data sample.
+        """
+        return (self.model.predict([X[:, i] for i in range(X.shape[1])])
+                          .reshape(-1))
+
+
+class NeuralMatrixFactorization(BaseEstimator):
+    """Recommender implementing the NeuMF architecture, an ensemble of GMF/MLP.
+
+    Args:
+        gmf_n_factors: The number of latent factors for GMF.
+        mlp_n_factors: The number of latent factors for MLP.
+        mlp_n_hidden_layers: The number of hidden layers.
+        epochs: The number of epochs to train the NN.
+        seed: A random seed.
+        user_input: A Keras input for the users.
+        item_input: A Keras input for the items.
+        user_preprocessing_layers: Keras preprocessing layers for the users.
+        item_preprocessing_layers: Keras preprocessing layers for the items.
+    """
+    def __init__(self,
+                 gmf_n_factors=8,
+                 mlp_n_factors=8,
+                 mlp_n_hidden_layers=4,
+                 epochs=10,
+                 seed=None,
+                 user_input=None,
+                 item_input=None,
+                 user_preprocessing_layers=None,
+                 item_preprocessing_layers=None):
+        self.gmf_n_factors = gmf_n_factors
+        self.mlp_n_factors = mlp_n_factors
+        self.mlp_n_hidden_layers = mlp_n_hidden_layers
+        self.epochs = epochs
+        self.seed = seed
+        self.user_input = user_input
+        self.item_input = item_input
+        self.user_preprocessing_layers = user_preprocessing_layers
+        self.item_preprocessing_layers = item_preprocessing_layers
+
+    def create_model(self):
+        """Creates a new NeuMF model."""
+
+        user_input = (self.user_input
+                      if self.user_input is not None else
+                      keras.Input(shape=(1), name="user", dtype="int64"))
+        item_input = (self.item_input
+                      if self.item_input is not None else
+                      keras.Input(shape=(1), name="item", dtype="int64"))
+
+        user_preprocessing_layers = (
+            self.user_preprocessing_layers
+            if self.user_preprocessing_layers is not None
+            else user_input
+        )
+        item_preprocessing_layers = (
+            self.item_preprocessing_layers
+            if self.item_preprocessing_layers is not None
+            else item_input
+        )
+
+        gmf_layers = GeneralizedMatrixFactorization.create_core_layers(
+            self.gmf_n_factors,
+            user_preprocessing_layers,
+            item_preprocessing_layers
+        )
+
+        mlp_layers = MultiLayerPerceptron.create_core_layers(
+            self.mlp_n_factors,
+            self.mlp_n_hidden_layers,
+            user_preprocessing_layers,
+            item_preprocessing_layers
+        )
+
+        neumf_layers = [gmf_layers, mlp_layers]
+        neumf_layers = keras.layers.Concatenate()(neumf_layers)
+        neumf_layers = (
+            keras.layers.Dense(1,
+                               activation="sigmoid",
+                               kernel_constraint=keras.constraints.unit_norm(),
+                               use_bias=False)(neumf_layers)
+        )
+
+        self.model = keras.Model(inputs=[user_input, item_input],
+                                 outputs=[neumf_layers],
+                                 name="neural_matrix_factorization")
+
+    def fit(self, X=None, y=None):
+        """Fit the recommender from the training dataset.
+
+        Args:
+            X (ndarray of shape (n_samples, 2)): An array where each row
+                                                 consists of a user and an
+                                                 item.
+            y (ndarray of shape (n_samples,)): An array where each entry
+                                               denotes interactions between
+                                               the corresponding user and item.
+        """
+        if self.seed:
+            random.seed(self.seed)
+            np.random.seed(self.seed)
+            tf.random.set_seed(self.seed)
+
+        self.create_model()
+        self.model.compile(optimizer=keras.optimizers.SGD(),
+                           loss=keras.losses.BinaryCrossentropy(),
+                           metrics=[keras.metrics.BinaryAccuracy()])
+
+        self.history = self.model.fit([X[:, i] for i in range(X.shape[1])],
+                                      y,
+                                      epochs=self.epochs)
+
+    def predict(self, X=None):
+        """Predict the scores for the provided data.
+
+        Args:
+            X (ndarray of shape (n_samples, 2)): An array where each row
+                                                 consists of a user and an
+                                                 item.
+
+        Returns:
+            ndarray of shape (n_samples,): Class labels for each data sample.
         """
         return (self.model.predict([X[:, i] for i in range(X.shape[1])])
                           .reshape(-1))

@@ -224,6 +224,17 @@ class GeneralizedMatrixFactorization(ImplicitKerasRecommender):
 
         return user_dense_kwdargs, item_dense_kwdargs
 
+    def get_output_weights(self):
+        """Returns the kernel and bias for the output layer of this model.
+
+            Returns:
+                List[ndarray, Optional[ndarray]]: The kernel and bias.
+        """
+        if not self.model:
+            raise RuntimeError("GMF is not trained.")
+
+        return self.model.layers[9].get_weights()
+
 
 class MultiLayerPerceptron(ImplicitKerasRecommender):
     """Recommender implementing the MLP architecture.
@@ -350,6 +361,17 @@ class MultiLayerPerceptron(ImplicitKerasRecommender):
 
         return hidden_layers_kwdargs
 
+    def get_output_weights(self):
+        """Returns the kernel and bias for the output layer of this model.
+
+            Returns:
+                List[ndarray, Optional[ndarray]]: The kernel and bias.
+        """
+        if not self.model:
+            raise RuntimeError("MLP is not trained.")
+
+        return self.model.layers[11].get_weights()[0], None
+
 
 class NeuralMatrixFactorization(ImplicitKerasRecommender):
     """Recommender implementing the NeuMF architecture, an ensemble of GMF/MLP.
@@ -384,7 +406,8 @@ class NeuralMatrixFactorization(ImplicitKerasRecommender):
                  user_preprocessing_layers=None,
                  item_preprocessing_layers=None,
                  gmf_trained=None,
-                 mlp_trained=None):
+                 mlp_trained=None,
+                 alpha=0.5):
         self.gmf_n_factors = gmf_n_factors
         self.mlp_n_factors = mlp_n_factors
         self.mlp_n_hidden_layers = mlp_n_hidden_layers
@@ -396,6 +419,7 @@ class NeuralMatrixFactorization(ImplicitKerasRecommender):
         self.item_preprocessing_layers = item_preprocessing_layers
         self.gmf_trained = gmf_trained
         self.mlp_trained = mlp_trained
+        self.alpha = alpha
 
     def create_model(self):
         """Creates a new NeuMF model.
@@ -425,22 +449,30 @@ class NeuralMatrixFactorization(ImplicitKerasRecommender):
 
         user_dense_kwdargs = {}
         item_dense_kwdargs = {}
-        if self.gmf_trained:
+        hidden_layers_kwdargs = []
+        neumf_output_kernel = "glorot_uniform"
+
+        if self.gmf_trained and self.mlp_trained:
             if self.gmf_trained.n_factors != self.gmf_n_factors:
                 raise RuntimeError("GMF factors are not consistent.")
 
-            user_dense_kwdargs, item_dense_kwdargs = (
-                self.gmf_trained.get_core_layers_kwdargs()
-            )
-
-        hidden_layers_kwdargs = []
-        if self.mlp_trained:
             if self.mlp_trained.n_factors != self.mlp_n_factors:
                 raise RuntimeError("MLP factors are not consistent.")
             if self.mlp_trained.n_hidden_layers != self.mlp_n_hidden_layers:
                 raise RuntimeError("MLP factors are not consistent.")
 
+            user_dense_kwdargs, item_dense_kwdargs = (
+                self.gmf_trained.get_core_layers_kwdargs()
+            )
+
             hidden_layers_kwdargs = self.mlp_trained.get_core_layers_kwdargs()
+
+            gmf_output_kernel, _ = self.gmf_trained.get_output_weights()
+            mlp_output_kernel, _ = self.mlp_trained.get_output_weights()
+            neumf_output_kernel = keras.initializers.Constant(
+                np.concatenate((gmf_output_kernel * self.alpha,
+                                mlp_output_kernel * (1 - self.alpha)))
+            )
 
         gmf_layers = GeneralizedMatrixFactorization.create_core_layers(
             self.gmf_n_factors,
@@ -463,6 +495,7 @@ class NeuralMatrixFactorization(ImplicitKerasRecommender):
         neumf_layers = (
             keras.layers.Dense(1,
                                activation="sigmoid",
+                               kernel_initializer=neumf_output_kernel,
                                kernel_constraint=keras.constraints.unit_norm(),
                                use_bias=False)(neumf_layers)
         )

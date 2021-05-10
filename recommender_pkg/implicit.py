@@ -233,7 +233,7 @@ class GeneralizedMatrixFactorization(ImplicitKerasRecommender):
         if not self.model:
             raise RuntimeError("GMF is not trained.")
 
-        return self.model.layers[9].get_weights()
+        return self.model.layers[-1].get_weights()
 
 
 class MultiLayerPerceptron(ImplicitKerasRecommender):
@@ -370,7 +370,7 @@ class MultiLayerPerceptron(ImplicitKerasRecommender):
         if not self.model:
             raise RuntimeError("MLP is not trained.")
 
-        return self.model.layers[11].get_weights()[0], None
+        return [self.model.layers[-1].get_weights()[0], None]
 
 
 class NeuralMatrixFactorization(ImplicitKerasRecommender):

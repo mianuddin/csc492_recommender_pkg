@@ -1,8 +1,7 @@
 import numpy as np
-import random
-import tensorflow as tf
 from sklearn.base import BaseEstimator
 from tensorflow import keras
+from .recommenders import KerasRecommender
 
 
 class ItemPopularity(BaseEstimator):
@@ -37,95 +36,44 @@ class ItemPopularity(BaseEstimator):
         return y_pred / max(y_pred)
 
 
-class ImplicitKerasRecommender(BaseEstimator):
-    """Abstract class for implicit recommenders built with Keras models."""
-    def __init__(self,
-                 epochs=10,
-                 seed=None,
-                 user_input=None,
-                 item_input=None,
-                 user_preprocessing_layers=None,
-                 item_preprocessing_layers=None):
-        # TODO: add optimizer, loss, metrics
-        self.epochs = epochs
-        self.seed = seed
-        self.user_input = user_input
-        self.item_input = item_input
-        self.user_preprocessing_layers = user_preprocessing_layers
-        self.item_preprocessing_layers = item_preprocessing_layers
-
-    def create_model(self):
-        """Creates a new Keras model."""
-        pass
-
-    def fit(self, X=None, y=None):
-        """Fit the recommender from the training dataset.
-
-        Args:
-            X (ndarray of shape (n_samples, 2)): An array where each row
-                                                 consists of a user and an
-                                                 item.
-            y (ndarray of shape (n_samples,)): An array where each entry
-                                               denotes interactions between
-                                               the corresponding user and item.
-        """
-        if self.seed:
-            random.seed(self.seed)
-            np.random.seed(self.seed)
-            tf.random.set_seed(self.seed)
-
-        # pylint: disable=assignment-from-no-return
-        self.model = self.create_model()
-
-        if not self.model:
-            raise RuntimeError("Model was not created.")
-
-        self.model.compile(optimizer=keras.optimizers.Adam(),
-                           loss=keras.losses.BinaryCrossentropy(),
-                           metrics=[keras.metrics.BinaryAccuracy()])
-
-        self.history = self.model.fit([X[:, i] for i in range(X.shape[1])],
-                                      y,
-                                      epochs=self.epochs)
-
-    def predict(self, X=None):
-        """Predict the scores for the provided data.
-
-        Args:
-            X (ndarray of shape (n_samples, 2)): An array where each row
-                                                 consists of a user and an
-                                                 item.
-
-        Returns:
-            ndarray of shape (n_samples,): Class labels for each data sample.
-        """
-        return (self.model.predict([X[:, i] for i in range(X.shape[1])])
-                          .reshape(-1))
-
-
-class GeneralizedMatrixFactorization(ImplicitKerasRecommender):
+class GeneralizedMatrixFactorization(KerasRecommender):
     """Recommender implementing the GMF architecture.
 
     Args:
-        n_factors: The number of latent factors
-        epochs: The number of epochs to train the NN
-        seed: A random seed
-        user_input: A Keras input for the users
-        item_input: A Keras input for the items
-        user_preprocessing_layers: Keras preprocessing layers for the users
-        item_preprocessing_layers: Keras preprocessing layers for the items
+        n_factors (int): The number of latent factors.
+        epochs (int): The number of epochs to train the NN.
+        optimizer (keras.optimizers.Optimizer): The model's optimizer.
+        loss (keras.losses.Loss): The loss function.
+        metrics (List[keras.metrics.Metric, ...]): The metric functions.
+        seed (int): A random seed.
+        user_input (keras.Input): An input for the users.
+        item_input (keras.Input): An input for the items.
+        user_preprocessing_layers (keras.layers.Layer): Preprocessing layers
+                                                        for the users.
+        item_preprocessing_layers (keras.layers.Layer): Preprocessing layers
+                                                        for the items.
     """
     def __init__(self,
                  n_factors=8,
                  epochs=10,
+                 optimizer=keras.optimizers.Adam(),
+                 loss=keras.losses.BinaryCrossentropy(),
+                 metrics=[keras.metrics.BinaryAccuracy()],
                  seed=None,
                  user_input=None,
                  item_input=None,
                  user_preprocessing_layers=None,
                  item_preprocessing_layers=None):
+        super().__init__(epochs,
+                         optimizer,
+                         loss,
+                         metrics,
+                         seed,
+                         user_input,
+                         item_input,
+                         user_preprocessing_layers,
+                         item_preprocessing_layers)
         self.n_factors = n_factors
-        self.epochs = epochs
-        self.seed = seed
         self.user_input = user_input
         self.item_input = item_input
         self.user_preprocessing_layers = user_preprocessing_layers
@@ -143,18 +91,18 @@ class GeneralizedMatrixFactorization(ImplicitKerasRecommender):
         the inputs and the visible, output layer.
 
         Args:
-            n_factors (int): The number of latent factors
-            user_layers (Layer): The input or preprocessing layers for the
-                                 users.
-            item_layers (Layer): The input or preprocessing layers for the
-                                 items.
-            user_dense_kwdargs (Dictionary): The keyword arguments for the
+            n_factors (int): The number of latent factors.
+            user_layers (keras.layers.Layer): The input or preprocessing layers
+                                              for the users.
+            item_layers (keras.layers.Layer): The input or preprocessing layers
+                                              for the items.
+            user_dense_kwdargs (Dict): The keyword arguments for the
                                              user dense layer.
-            item_dense_kwdargs (Dictionary): The keyword arguments for the
+            item_dense_kwdargs (Dict): The keyword arguments for the
                                              item dense layer.
 
         Returns:
-            Layer: The core layers of the model.
+            keras.layers.Layer: The core layers of the model.
         """
 
         gmf_layers = [
@@ -205,8 +153,8 @@ class GeneralizedMatrixFactorization(ImplicitKerasRecommender):
         """Returns the appropriate kwdargs for pretraining core layers.
 
             Returns:
-                Dictionary, Dictionary: The keyword arguments for the user
-                                        and item dense layers.
+                Dict, Dict: The keyword arguments for the user and item dense
+                            layers.
         """
         if not self.model:
             raise RuntimeError("GMF is not trained.")
@@ -236,32 +184,47 @@ class GeneralizedMatrixFactorization(ImplicitKerasRecommender):
         return self.model.layers[-1].get_weights()
 
 
-class MultiLayerPerceptron(ImplicitKerasRecommender):
+class MultiLayerPerceptron(KerasRecommender):
     """Recommender implementing the MLP architecture.
 
     Args:
-        n_factors: The number of latent factors
-        n_hidden_layers: The number of hidden layers
-        epochs: The number of epochs to train the NN
-        seed: A random seed
-        user_input: A Keras input for the users
-        item_input: A Keras input for the items
-        user_preprocessing_layers: Keras preprocessing layers for the users
-        item_preprocessing_layers: Keras preprocessing layers for the items
+        n_factors (int): The number of latent factors.
+        n_hidden_layers (int): The number of hidden layers.
+        epochs (int): The number of epochs to train the NN.
+        optimizer (keras.optimizers.Optimizer): The model's optimizer.
+        loss (keras.losses.Loss): The loss function.
+        metrics (List[keras.metrics.Metric, ...]): The metric functions.
+        seed (int): A random seed.
+        user_input (keras.Input): An input for the users.
+        item_input (keras.Input): An input for the items.
+        user_preprocessing_layers (keras.layers.Layer): Preprocessing layers
+                                                        for the users.
+        item_preprocessing_layers (keras.layers.Layer): Preprocessing layers
+                                                        for the items.
     """
     def __init__(self,
                  n_factors=8,
                  n_hidden_layers=4,
                  epochs=10,
+                 optimizer=keras.optimizers.Adam(),
+                 loss=keras.losses.BinaryCrossentropy(),
+                 metrics=[keras.metrics.BinaryAccuracy()],
                  seed=None,
                  user_input=None,
                  item_input=None,
                  user_preprocessing_layers=None,
                  item_preprocessing_layers=None):
+        super().__init__(epochs,
+                         optimizer,
+                         loss,
+                         metrics,
+                         seed,
+                         user_input,
+                         item_input,
+                         user_preprocessing_layers,
+                         item_preprocessing_layers)
         self.n_factors = n_factors
         self.n_hidden_layers = n_hidden_layers
-        self.epochs = epochs
-        self.seed = seed
         self.user_input = user_input
         self.item_input = item_input
         self.user_preprocessing_layers = user_preprocessing_layers
@@ -279,17 +242,17 @@ class MultiLayerPerceptron(ImplicitKerasRecommender):
         the inputs and the visible, output layer.
 
         Args:
-            n_factors (int): The number of latent factors
-            user_layers (Layer): The input or preprocessing layers for the
-                                 users.
-            item_layers (Layer): The input or preprocessing layers for the
-                                 items.
-            hidden_layers_kwdargs (List[Dictionary, ...]): The keyword
+            n_factors (int): The number of latent factors.
+            user_layers (keras.layers.Layer): The input or preprocessing layers
+                                              for the users.
+            item_layers (keras.layers.Layer): The input or preprocessing layers
+                                              for the items.
+            hidden_layers_kwdargs (List[Dict, ...]): The keyword
                                                            arguments for each
                                                            hidden layer.
 
         Returns:
-            Layer: The core layers of the model.
+            keras.layers.Layer: The core layers of the model.
         """
 
         mlp_layers = keras.layers.Concatenate()([user_layers, item_layers])
@@ -346,7 +309,7 @@ class MultiLayerPerceptron(ImplicitKerasRecommender):
         """Returns the appropriate kwdargs for pretraining core layers.
 
             Returns:
-                Dictionary: The keyword arguments for the hidden layers.
+                Dict: The keyword arguments for the hidden layers.
         """
         if not self.model:
             raise RuntimeError("MLP is not trained.")
@@ -373,59 +336,73 @@ class MultiLayerPerceptron(ImplicitKerasRecommender):
         return [self.model.layers[-1].get_weights()[0], None]
 
 
-class NeuralMatrixFactorization(ImplicitKerasRecommender):
+class NeuralMatrixFactorization(KerasRecommender):
     """Recommender implementing the NeuMF architecture, an ensemble of GMF/MLP.
 
     Args:
         gmf_n_factors (int): The number of latent factors for GMF.
         mlp_n_factors (int): The number of latent factors for MLP.
         mlp_n_hidden_layers (int): The number of hidden layers.
-        epochs (int): The number of epochs to train the NN.
-        seed (int): A random seed.
-        user_input (Keras.Input): An input for the users.
-        item_input (Keras.Input): An input for the items.
-        user_preprocessing_layers (Keras.Layer): Preprocessing layers for the
-                                                 users.
-        item_preprocessing_layers (Keras.Layer): Preprocessing layers for the
-                                                 users.
         gmf_trained (GeneralizedMatrixFactorization): A trained GMF model of
                                                       the same number of
                                                       factors.
         mlp_trained (MultiLayerPerceptron): A trained MLP model of the same
                                             number of factors and hidden
                                             layers.
+        alpha (float): The tradeoff between MLP and GMF.
+        epochs (int): The number of epochs to train the NN.
+        optimizer (keras.optimizers.Optimizer): The model's optimizer.
+        loss (keras.losses.Loss): The loss function.
+        metrics (List[keras.metrics.Metric, ...]): The metric functions.
+        seed (int): A random seed.
+        user_input (keras.Input): An input for the users.
+        item_input (keras.Input): An input for the items.
+        user_preprocessing_layers (keras.layers.Layer): Preprocessing layers
+                                                        for the users.
+        item_preprocessing_layers (keras.layers.Layer): Preprocessing layers
+                                                        for the items.
     """
     def __init__(self,
                  gmf_n_factors=8,
                  mlp_n_factors=8,
                  mlp_n_hidden_layers=4,
+                 gmf_trained=None,
+                 mlp_trained=None,
+                 alpha=0.5,
                  epochs=10,
+                 optimizer=keras.optimizers.SGD(),
+                 loss=keras.losses.BinaryCrossentropy(),
+                 metrics=[keras.metrics.BinaryAccuracy()],
                  seed=None,
                  user_input=None,
                  item_input=None,
                  user_preprocessing_layers=None,
-                 item_preprocessing_layers=None,
-                 gmf_trained=None,
-                 mlp_trained=None,
-                 alpha=0.5):
+                 item_preprocessing_layers=None):
+        super().__init__(epochs,
+                         optimizer,
+                         loss,
+                         metrics,
+                         seed,
+                         user_input,
+                         item_input,
+                         user_preprocessing_layers,
+                         item_preprocessing_layers)
         self.gmf_n_factors = gmf_n_factors
         self.mlp_n_factors = mlp_n_factors
         self.mlp_n_hidden_layers = mlp_n_hidden_layers
-        self.epochs = epochs
-        self.seed = seed
+        self.gmf_trained = gmf_trained
+        self.mlp_trained = mlp_trained
+        self.alpha = alpha
         self.user_input = user_input
         self.item_input = item_input
         self.user_preprocessing_layers = user_preprocessing_layers
         self.item_preprocessing_layers = item_preprocessing_layers
-        self.gmf_trained = gmf_trained
-        self.mlp_trained = mlp_trained
-        self.alpha = alpha
 
     def create_model(self):
         """Creates a new NeuMF model.
 
         Returns:
-            Keras.Model: The NeuMF model. It will be pretrained if trained
+            keras.Model: The NeuMF model. It will be pretrained if trained
                          models are provided in the constructor.
         """
 

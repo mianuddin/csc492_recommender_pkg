@@ -11,7 +11,7 @@ class Recommender(BaseEstimator):
 
 class KerasRecommender(Recommender):
     """Abstract class for recommenders built with Keras models.
-    
+
     Args:
         epochs (int): The number of epochs to train the NN.
         optimizer (keras.optimizers.Optimizer): The model's optimizer.

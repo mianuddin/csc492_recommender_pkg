@@ -36,14 +36,38 @@ class FunkSVD(Recommender):
         self.verbose = verbose
 
     def create_latent_factor_matrices(self):
+        """Create matrices for the latent factors of the users and items.
+        
+        Creates the matrices which represent the factorization of the user-item
+        matrix. In the user latent factor matrix, the rows are the users and
+        the columns are the latent factors. In the item latent factor matrix,
+        the rows are latent factors and the columns are the items.
+
+        Returns:
+            ndarray, ndarray: The latent factor matrices for users and items
+                              respectively.
+        """
         user_df = np.full((len(self.users), self.latent_factors), 0.1)
         item_df = np.full((self.latent_factors, len(self.items)), 0.1)
         return user_df, item_df
 
     def predict_rating(self, user_i, item_i):
+        """Predict the rating for an item by the given user.
+        
+        Args:
+            user_i (int): The user index.
+            item_i (int): The item index.
+        
+        Returns:
+            float: The predicted rating of the item by the user.
+        """
         return np.dot(self.user_df[user_i], self.item_df[:, item_i])
 
     def process_users_items(self):
+        """Create dictionaries mapping user and item ids to indexes.
+        
+        Replicates the functionality provided by Keras's `IntegerLookup`.
+        """
         self.user_to_idx = {}
         self.idx_to_user = {}
         for i, u in enumerate(self.users):
@@ -57,6 +81,16 @@ class FunkSVD(Recommender):
             self.idx_to_item[i] = x
 
     def train_pair(self, user, item, actual_rating):
+        """Train the model on a single user-item pair.
+
+        Args:
+            user (int): The user id.
+            item (int): The item id.
+            actual_rating (float): The rating of the item by the user.
+
+        Returns:
+            float: The difference between the true and predicted ratings.
+        """
         user_i = self.user_to_idx[user]
         item_i = self.item_to_idx[item]
         predicted_rating = self.predict_rating(user_i, item_i)
@@ -78,6 +112,16 @@ class FunkSVD(Recommender):
         return error
 
     def fit(self, X=None, y=None):
+        """Fit the recommender from the training dataset.
+
+        Args:
+            X (ndarray of shape (n_samples, 2)): An array where each row
+                                                 consists of a user and an
+                                                 item.
+            y (ndarray of shape (n_samples,)): An array where each entry
+                                               denotes interactions between
+                                               the corresponding user and item.
+        """
         self.process_users_items()
 
         self.user_df, self.item_df = self.create_latent_factor_matrices()
@@ -101,6 +145,16 @@ class FunkSVD(Recommender):
                 print(f"{epoch:02}\t{rmse:.8g}")
 
     def predict(self, X=None):
+        """Predict the scores for the provided data.
+
+        Args:
+            X (ndarray of shape (n_samples, 2)): An array where each row
+                                                 consists of a user and an
+                                                 item.
+
+        Returns:
+            ndarray of shape (n_samples,): Class labels for each data sample.
+        """
         return [self.predict_rating(self.user_to_idx[user],
                                     self.item_to_idx[item])
                 for user, item in X]

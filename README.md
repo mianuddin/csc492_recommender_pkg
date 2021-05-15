@@ -1,6 +1,7 @@
 # Recommender Package
 
-CSC 491/492
+CSC 491<br>
+CSC 492
 
 Mian Uddin
 
@@ -20,5 +21,6 @@ python3 -m unittest tests
 ## Document
 Use the following command to build the documentation.
 ```sh
+sphinx-apidoc -f -o docs/source recommender_pkg/
 (cd docs/ && make html)
 ```

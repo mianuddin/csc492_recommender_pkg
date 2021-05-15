@@ -37,7 +37,7 @@ class FunkSVD(Recommender):
 
     def create_latent_factor_matrices(self):
         """Create matrices for the latent factors of the users and items.
-        
+
         Creates the matrices which represent the factorization of the user-item
         matrix. In the user latent factor matrix, the rows are the users and
         the columns are the latent factors. In the item latent factor matrix,
@@ -53,11 +53,11 @@ class FunkSVD(Recommender):
 
     def predict_rating(self, user_i, item_i):
         """Predict the rating for an item by the given user.
-        
+
         Args:
             user_i (int): The user index.
             item_i (int): The item index.
-        
+
         Returns:
             float: The predicted rating of the item by the user.
         """
@@ -65,7 +65,7 @@ class FunkSVD(Recommender):
 
     def process_users_items(self):
         """Create dictionaries mapping user and item ids to indexes.
-        
+
         Replicates the functionality provided by Keras's `IntegerLookup`.
         """
         self.user_to_idx = {}

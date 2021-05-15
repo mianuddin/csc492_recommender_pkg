@@ -49,7 +49,7 @@ class FunkSVD(Recommender):
         for i, u in enumerate(self.users):
             self.user_to_idx[u] = i
             self.idx_to_user[i] = u
-        
+
         self.item_to_idx = {}
         self.idx_to_item = {}
         for i, x in enumerate(self.items):
@@ -100,11 +100,11 @@ class FunkSVD(Recommender):
 
                 print(f"{epoch:02}\t{rmse:.8g}")
 
-
     def predict(self, X=None):
         return [self.predict_rating(self.user_to_idx[user],
                                     self.item_to_idx[item])
                 for user, item in X]
+
 
 class MatrixFactorization(KerasRecommender):
     """Recommender implementing Funk SVD with a NN.

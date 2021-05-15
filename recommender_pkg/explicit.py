@@ -180,14 +180,25 @@ class MatrixFactorization(KerasRecommender):
     def __init__(self,
                  n_factors=100,
                  epochs=10,
+                 optimizer=keras.optimizers.SGD(),
+                 loss=keras.losses.MeanSquaredError(),
+                 metrics=[keras.metrics.RootMeanSquaredError(),
+                          keras.metrics.MeanAbsoluteError()],
                  seed=None,
                  user_input=None,
                  item_input=None,
                  user_preprocessing_layers=None,
                  item_preprocessing_layers=None):
+        super.__init__(epochs,
+                       optimizer,
+                       loss,
+                       metrics,
+                       seed,
+                       user_input,
+                       item_input,
+                       user_preprocessing_layers,
+                       item_preprocessing_layers)
         self.n_factors = n_factors
-        self.epochs = epochs
-        self.seed = seed
         self.user_input = user_input
         self.item_input = item_input
         self.user_preprocessing_layers = user_preprocessing_layers

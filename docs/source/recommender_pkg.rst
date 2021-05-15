@@ -12,6 +12,14 @@ recommender\_pkg.evaluation module
    :undoc-members:
    :show-inheritance:
 
+recommender\_pkg.explicit module
+--------------------------------
+
+.. automodule:: recommender_pkg.explicit
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 recommender\_pkg.implicit module
 --------------------------------
 
@@ -40,6 +48,14 @@ recommender\_pkg.preprocessing module
 -------------------------------------
 
 .. automodule:: recommender_pkg.preprocessing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+recommender\_pkg.recommenders module
+------------------------------------
+
+.. automodule:: recommender_pkg.recommenders
    :members:
    :undoc-members:
    :show-inheritance:

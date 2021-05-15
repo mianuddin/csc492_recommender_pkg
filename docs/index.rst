@@ -5,6 +5,9 @@
 
 Welcome to recommender_pkg's documentation!
 ===========================================
+CSC 491, 492
+
+Cal Poly, San Luis Obispo
 
 .. toctree::
    :maxdepth: 2
@@ -17,4 +20,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`

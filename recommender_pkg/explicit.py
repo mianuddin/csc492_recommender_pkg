@@ -189,15 +189,15 @@ class MatrixFactorization(KerasRecommender):
                  item_input=None,
                  user_preprocessing_layers=None,
                  item_preprocessing_layers=None):
-        super.__init__(epochs,
-                       optimizer,
-                       loss,
-                       metrics,
-                       seed,
-                       user_input,
-                       item_input,
-                       user_preprocessing_layers,
-                       item_preprocessing_layers)
+        super().__init__(epochs,
+                         optimizer,
+                         loss,
+                         metrics,
+                         seed,
+                         user_input,
+                         item_input,
+                         user_preprocessing_layers,
+                         item_preprocessing_layers)
         self.n_factors = n_factors
         self.user_input = user_input
         self.item_input = item_input

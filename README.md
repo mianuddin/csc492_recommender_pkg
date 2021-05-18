@@ -13,6 +13,14 @@ $ pip install recommender-pkg
 
 **School:** Cal Poly, San Luis Obispo
 
+## Usage
+```python3
+import recpkg
+```
+
+See the [documentation](https://csc492-recommender-pkg.readthedocs.io/) for
+more.
+
 ## Build
 Use the following command to build a wheel of this package.
 

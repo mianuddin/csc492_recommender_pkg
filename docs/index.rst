@@ -15,7 +15,7 @@ __ https://github.com/mianuddin/csc492_recommender_pkg
    :maxdepth: 2
    :caption: Contents:
 
-   source/recommender_pkg
+   source/recpkg
 
 
 Indices and tables

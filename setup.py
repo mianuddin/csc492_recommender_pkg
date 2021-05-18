@@ -13,7 +13,7 @@ if __name__ == "__main__":
                      long_description=long_description,
                      long_description_content_type="text/markdown",
                      url="https://csc492-recommender-pkg.readthedocs.io/",
-                     packages=["recommender_pkg"],
+                     packages=["recpkg"],
                      install_requires=["numpy==1.19.5",
                                        "pandas==1.2.4",
                                        "seaborn==0.11.1",

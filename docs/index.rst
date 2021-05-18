@@ -5,14 +5,20 @@
 
 Welcome to recommender_pkg's documentation!
 ===========================================
-CSC 491, 492
+Implementations of explicit and implicit recommenders with Numpy and Keras.
 
-Cal Poly, San Luis Obispo
+::
+
+   Author...: Mian Uddin
+   Advisor..: Dr. Paul Anderson
+   Course(s): CSC 491, CSC 492
+   School...: Cal Poly, San Luis Obispo
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   source/recommender_pkg
 
 
 Indices and tables

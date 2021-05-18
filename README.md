@@ -5,12 +5,9 @@ Implementations of explicit and implicit recommenders with Numpy and Keras.
 $ pip install recommender-pkg
 ```
 
-**Author:** Mian Uddin
-
-**Advisor:** Dr. Paul Anderson
-
-**Course(s):** CSC 491, CSC 492
-
+**Author:** Mian Uddin<br>
+**Advisor:** Dr. Paul Anderson<br>
+**Course(s):** CSC 491, CSC 492<br>
 **School:** Cal Poly, San Luis Obispo
 
 ## Usage

@@ -7,12 +7,9 @@ Welcome to recommender_pkg's documentation!
 ===========================================
 Implementations of explicit and implicit recommenders with Numpy and Keras.
 
-::
+`View package source on GitHub`__.
 
-   Author...: Mian Uddin
-   Advisor..: Dr. Paul Anderson
-   Course(s): CSC 491, CSC 492
-   School...: Cal Poly, San Luis Obispo
+__ https://github.com/mianuddin/csc492_recommender_pkg
 
 .. toctree::
    :maxdepth: 2
@@ -26,3 +23,10 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
+
+::
+
+   Author...: Mian Uddin
+   Advisor..: Dr. Paul Anderson
+   Course(s): CSC 491, CSC 492
+   School...: Cal Poly, San Luis Obispo

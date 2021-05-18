@@ -152,9 +152,9 @@ class GeneralizedMatrixFactorization(KerasRecommender):
     def get_core_layers_kwdargs(self):
         """Returns the appropriate kwdargs for pretraining core layers.
 
-            Returns:
-                Dict, Dict: The keyword arguments for the user and item dense
-                            layers.
+        Returns:
+            Tuple[Dict, Dict]: The keyword arguments for the user and item
+            dense layers.
         """
         if not self.model:
             raise RuntimeError("GMF is not trained.")
@@ -175,8 +175,8 @@ class GeneralizedMatrixFactorization(KerasRecommender):
     def get_output_weights(self):
         """Returns the kernel and bias for the output layer of this model.
 
-            Returns:
-                List[ndarray, Optional[ndarray]]: The kernel and bias.
+        Returns:
+            List[ndarray, Optional[ndarray]]: The kernel and bias.
         """
         if not self.model:
             raise RuntimeError("GMF is not trained.")
@@ -308,8 +308,8 @@ class MultiLayerPerceptron(KerasRecommender):
     def get_core_layers_kwdargs(self):
         """Returns the appropriate kwdargs for pretraining core layers.
 
-            Returns:
-                Dict: The keyword arguments for the hidden layers.
+        Returns:
+            Dict[String, Object]: The keyword arguments for the hidden layers.
         """
         if not self.model:
             raise RuntimeError("MLP is not trained.")
@@ -327,8 +327,8 @@ class MultiLayerPerceptron(KerasRecommender):
     def get_output_weights(self):
         """Returns the kernel and bias for the output layer of this model.
 
-            Returns:
-                List[ndarray, Optional[ndarray]]: The kernel and bias.
+        Returns:
+            List[ndarray, Optional[ndarray]]: The kernel and bias.
         """
         if not self.model:
             raise RuntimeError("MLP is not trained.")
@@ -403,7 +403,7 @@ class NeuralMatrixFactorization(KerasRecommender):
 
         Returns:
             keras.Model: The NeuMF model. It will be pretrained if trained
-                         models are provided in the constructor.
+            models are provided in the constructor.
         """
 
         user_input = (self.user_input

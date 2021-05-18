@@ -44,8 +44,8 @@ class FunkSVD(Recommender):
         the rows are latent factors and the columns are the items.
 
         Returns:
-            ndarray, ndarray: The latent factor matrices for users and items
-                              respectively.
+            Tuple[ndarray, ndarray]: The latent factor matrices for users and
+            items respectively.
         """
         user_df = np.full((len(self.users), self.latent_factors), 0.1)
         item_df = np.full((self.latent_factors, len(self.items)), 0.1)
@@ -221,7 +221,7 @@ class MatrixFactorization(KerasRecommender):
                                               for the items.
 
         Returns:
-            Layer: The core layers of the model.
+            keras.layers.Layer: The core layers of the model.
         """
 
         mf_layers = [

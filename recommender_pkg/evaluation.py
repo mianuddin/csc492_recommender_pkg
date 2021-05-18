@@ -77,7 +77,7 @@ def evaluate_model(ModelConstructor,
 
     Returns:
         Dict[String, Dict]: The configs, trained models, history dataframes,
-                            training plots, and groupwise evaluations.
+        training plots, and groupwise evaluations.
     """
 
     trained_models = {}

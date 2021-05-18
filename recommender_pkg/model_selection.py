@@ -14,14 +14,17 @@ def LeaveMembersOut(*lists, groups=None, n_val=1, n_test=1, seed=None):
     of members of each group will be placed in the validation and test sets.
 
     Args:
-        *lists: One or more lists from which to leave members out
-        groups: A list by which the indices may be grouped (e.g. user ids)
-        n_val: The number of members to be left out for the val set
-        n_test: The number of members to be left out for the test set
-        seed: A random seed
+        *lists (List[List, ...]): One or more lists from which to leave members
+        out. They should be the same length.
+        groups (List): A list by which the indices may be grouped
+        (e.g. user ids). This should be the same length as the provided lists.
+        n_val (int): The number of members to be left out for the val set.
+        n_test (int): The number of members to be left out for the test set.
+        seed (int): A random seed.
 
     Returns:
-        A tuple containing lists of indices in the order train, val, test
+        Tuple[List, List, List]: Lists of indicies for the train, val, and test
+        sets, respectively.
     """
     if seed is not None:
         random.seed(seed)
@@ -64,15 +67,18 @@ def sample_n_non_interactions(X, y, user_id, n=100, seed=None):
     which the user has not interacted with.
 
     Args:
-        X: An array of (user, item)
-        y: An array denoting interactions
-        user_id: The unique identifier of a user
-        n: The number of non-interactions to sample
-        seed: A random seed
+        X (ndarray of shape (n_samples, 2)): An array where each row consists
+                                             of a user and an item.
+        y (ndarray of shape (n_samples,)): An array where each entry denotes
+                                           interactions between the
+                                           corresponding user and item.
+        user_id (int): The unique identifier of a user.
+        n (int): The number of non-interactions to sample.
+        seed (int): A random seed.
 
     Returns:
-        A tuple consisting of an array of (user, item) and an array of zeros
-
+        Tuple[ndarray of shape (n_samples, 2), ndarray of shape (n_samples,)]):
+        The X and y arrays of non interactions.
     """
     if seed is not None:
         np.random.seed(seed)

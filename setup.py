@@ -6,13 +6,13 @@ if __name__ == "__main__":
     with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
         long_description = f.read()
     setuptools.setup(name="recommender-pkg",
-                     version="0.0.3",
+                     version="0.0.4",
                      author="Mian Uddin",
                      author_email="mianuddin@gmail.com",
                      description="A small recommender package",
                      long_description=long_description,
                      long_description_content_type="text/markdown",
-                     url="https://csc492-recommender-pkg.readthedocs.io/",
+                     url="https://github.com/mianuddin/csc492_recommender_pkg",
                      packages=["recpkg"],
                      install_requires=["numpy==1.19.5",
                                        "pandas==1.2.4",

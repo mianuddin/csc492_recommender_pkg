@@ -4,7 +4,7 @@ import random
 import re
 import seaborn as sns
 import tensorflow as tf
-from tqdm import tqdm
+import tqdm
 from .metrics import perform_groupwise_evaluation
 from .preprocessing import get_standard_layers
 
@@ -47,7 +47,8 @@ def evaluate_model(ModelConstructor,
                    y_test,
                    seed_val,
                    configs,
-                   plot=False):
+                   plot=False,
+                   nb=False):
     """Evaluate multiple of model configs.
 
     Args:
@@ -74,6 +75,7 @@ def evaluate_model(ModelConstructor,
                                              arguments to be applied in the
                                              model's constructor.
         plot (bool): Should training plots be made?
+        nb (bool): Whether or not model is running in a Jupyter notebook.
 
     Returns:
         Dict[String, Dict]: The configs, trained models, history dataframes,
@@ -91,7 +93,13 @@ def evaluate_model(ModelConstructor,
     user_input, user_pp_layers = get_standard_layers(users, "user")
     item_input, item_pp_layers = get_standard_layers(items, "item")
 
-    for i, config in tqdm(list(enumerate(configs))):
+    iterator = list(enumerate(configs))
+    if not nb:
+        iterator = tqdm.tqdm(iterator)
+    else:
+        iterator = tqdm.notebook.tqdm(iterator)
+
+    for i, config in iterator:
         if i != 0:
             print()
         print(f"CONFIG {i}")

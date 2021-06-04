@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from tensorflow import keras
-from tqdm import tqdm
+import tqdm
 from .recommenders import Recommender, KerasRecommender
 
 
@@ -18,6 +18,7 @@ class FunkSVD(Recommender):
         learning_rate (float): The learning rate of the model.
         regularization_term (float): The regularization term of the model.
         verbose (bool): Whether or not to print verbose output.
+        nb (bool): Whether or not model is running in a Jupyter notebook.
     """
     def __init__(self,
                  users,
@@ -26,7 +27,8 @@ class FunkSVD(Recommender):
                  epochs=10,
                  learning_rate=0.005,
                  regularization_term=0.02,
-                 verbose=False):
+                 verbose=False,
+                 nb=False):
         self.users = users
         self.items = items
         self.latent_factors = latent_factors
@@ -34,6 +36,7 @@ class FunkSVD(Recommender):
         self.learning_rate = learning_rate
         self.regularization_term = regularization_term
         self.verbose = verbose
+        self.nb = nb
 
     def create_latent_factor_matrices(self):
         """Create matrices for the latent factors of the users and items.
@@ -126,9 +129,13 @@ class FunkSVD(Recommender):
 
         self.user_df, self.item_df = self.create_latent_factor_matrices()
 
-        for epoch in (tqdm(range(self.epochs))
-                      if self.verbose
-                      else range(self.epochs)):
+        iterator = range(self.epochs)
+        if self.verbose and self.nb:
+            iterator = tqdm.tqdm(iterator)
+        elif self.verbose:
+            iterator = tqdm.notebook.tqdm(iterator)
+
+        for epoch in iterator:
             errors = []
 
             for i in range(len(X)):

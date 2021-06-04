@@ -14,9 +14,9 @@ if __name__ == "__main__":
                      long_description_content_type="text/markdown",
                      url="https://github.com/mianuddin/csc492_recommender_pkg",
                      packages=["recpkg"],
-                     install_requires=["numpy==1.19.5",
-                                       "pandas==1.2.4",
-                                       "seaborn==0.11.1",
-                                       "scikit-learn==0.24.1",
-                                       "tensorflow==2.5.0rc1",
-                                       "tqdm==4.60.0"])
+                     install_requires=["numpy",
+                                       "pandas",
+                                       "seaborn",
+                                       "scikit-learn",
+                                       "tensorflow==2.5.0",
+                                       "tqdm"])

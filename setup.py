@@ -18,5 +18,5 @@ if __name__ == "__main__":
                                        "pandas",
                                        "seaborn",
                                        "scikit-learn",
-                                       "tensorflow==2.5.0",
+                                       "tensorflow>=2.5.0rc0",
                                        "tqdm"])

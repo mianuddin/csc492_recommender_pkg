@@ -6,7 +6,7 @@ if __name__ == "__main__":
     with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
         long_description = f.read()
     setuptools.setup(name="recommender-pkg",
-                     version="0.0.4",
+                     version="0.0.5",
                      author="Mian Uddin",
                      author_email="mianuddin@gmail.com",
                      description="A small recommender package",

@@ -94,10 +94,10 @@ def evaluate_model(ModelConstructor,
     item_input, item_pp_layers = get_standard_layers(items, "item")
 
     iterator = list(enumerate(configs))
-    if not nb:
-        iterator = tqdm.tqdm(iterator)
-    else:
+    if nb:
         iterator = tqdm.notebook.tqdm(iterator)
+    else:
+        iterator = tqdm.tqdm(iterator)
 
     for i, config in iterator:
         if i != 0:

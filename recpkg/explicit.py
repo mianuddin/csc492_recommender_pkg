@@ -131,9 +131,9 @@ class FunkSVD(Recommender):
 
         iterator = range(self.epochs)
         if self.verbose and self.nb:
-            iterator = tqdm.tqdm(iterator)
-        elif self.verbose:
             iterator = tqdm.notebook.tqdm(iterator)
+        elif self.verbose:
+            iterator = tqdm.tqdm(iterator)
 
         for epoch in iterator:
             errors = []

@@ -1,6 +1,8 @@
 # Recommender Package
 Implementations of explicit and implicit recommenders with Numpy and Keras.
 
+Try it out with the [demo notebook](https://colab.research.google.com/drive/1pM9v2pzLQqBUhJdextV09g89tKtq3cHf?usp=sharing)!
+
 ```sh
 $ pip install recommender-pkg
 ```
